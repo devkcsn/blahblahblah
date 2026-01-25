@@ -1,0 +1,50 @@
+class Solution {
+    public double findMedianSortedArrays(int[] nums1, int[] nums2) {
+        // Ensure nums1 is the smaller array to optimize the binary search
+        if (nums1.length > nums2.length) {
+            return findMedianSortedArrays(nums2, nums1);
+        }
+        
+        int n1 = nums1.length;
+        int n2 = nums2.length;
+        int low = 0;
+        int high = n1;
+        // Total number of elements in the combined array
+        int combinedLength = n1 + n2;
+        // Half the combined length is used for partitioning
+        int halfLength = (combinedLength + 1) / 2;
+        
+        while (low <= high) {
+            // Find the partition points for both arrays
+            int partition1 = (low + high) / 2;
+            int partition2 = halfLength - partition1;
+            
+            // Determine the maximum element on the left side and minimum on the right side of the partitions
+            int maxLeft1 = (partition1 == 0) ? Integer.MIN_VALUE : nums1[partition1 - 1];
+            int minRight1 = (partition1 == n1) ? Integer.MAX_VALUE : nums1[partition1];
+            int maxLeft2 = (partition2 == 0) ? Integer.MIN_VALUE : nums2[partition2 - 1];
+            int minRight2 = (partition2 == n2) ? Integer.MAX_VALUE : nums2[partition2];
+            
+            // Check if the partition is correct (elements are correctly ordered)
+            if (maxLeft1 <= minRight2 && maxLeft2 <= minRight1) {
+                // The partitions are correct, so we found the median
+                if (combinedLength % 2 == 0) {
+                    // Even number of elements, median is the average of the two middle elements
+                    return (double) (Math.max(maxLeft1, maxLeft2) + Math.min(minRight1, minRight2)) / 2.0;
+                } else {
+                    // Odd number of elements, median is the single middle element
+                    return (double) Math.max(maxLeft1, maxLeft2);
+                }
+            } else if (maxLeft1 > minRight2) {
+                // partition1 is too large, move high to the left
+                high = partition1 - 1;
+            } else {
+                // maxLeft2 > minRight1, partition1 is too small, move low to the right
+                low = partition1 + 1;
+            }
+        }
+        
+        // This part should not be reached if the input is valid as per LeetCode problem constraints
+        throw new IllegalArgumentException("Input arrays are not sorted or invalid");
+    }
+}
