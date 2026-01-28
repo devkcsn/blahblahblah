@@ -1,0 +1,48 @@
+class Solution {
+    public double findMedianSortedArrays(int[] nums1, int[] nums2) {
+        // Ensure nums1 is the smaller array to apply binary search on it
+        if (nums1.length > nums2.length) {
+            return findMedianSortedArrays(nums2, nums1);
+        }
+        
+        int m = nums1.length;
+        int n = nums2.length;
+        int totalLength = m + n;
+        int halfLength = (totalLength + 1) / 2; // Target number of elements in the left partition
+
+        int left = 0;
+        int right = m;
+
+        while (left <= right) {
+            int i = left + (right - left) / 2; // Partition index for nums1
+            int j = halfLength - i; // Partition index for nums2
+
+            // Get the boundary elements for the partitions
+            // Use Integer.MIN_VALUE/MAX_VALUE if a partition is empty
+            int nums1Left = (i == 0) ? Integer.MIN_VALUE : nums1[i - 1];
+            int nums1Right = (i == m) ? Integer.MAX_VALUE : nums1[i];
+            int nums2Left = (j == 0) ? Integer.MIN_VALUE : nums2[j - 1];
+            int nums2Right = (j == n) ? Integer.MAX_VALUE : nums2[j];
+
+            // Check if the partition is correct (elements in the left part <= elements in the right part)
+            if (nums1Left <= nums2Right && nums2Left <= nums1Right) {
+                // Correct partition found
+                if (totalLength % 2 == 0) {
+                    // Even total length, median is average of the two middle elements
+                    return (Math.max(nums1Left, nums2Left) + Math.min(nums1Right, nums2Right)) / 2.0;
+                } else {
+                    // Odd total length, median is the single middle element
+                    return Math.max(nums1Left, nums2Left);
+                }
+            } else if (nums1Left > nums2Right) {
+                // nums1Left is too big, need fewer elements from nums1
+                right = i - 1;
+            } else {
+                // nums2Left is too big (or equivalently nums1Right is too small), need more elements from nums1
+                left = i + 1;
+            }
+        }
+        // This should not be reached if the inputs are sorted arrays
+        throw new IllegalArgumentException("Input arrays are not sorted.");
+    }
+}
